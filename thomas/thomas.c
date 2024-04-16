@@ -1,3 +1,11 @@
+
+/*
+
+Literally just ripped from wikipedia, do not use. For reference ONLY!
+Source: https://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm
+
+*/
+
 void thomas(const int X, double x[restrict X],
             const double a[restrict X], const double b[restrict X],
             const double c[restrict X], double scratch[restrict X]) {
