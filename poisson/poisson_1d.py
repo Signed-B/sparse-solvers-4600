@@ -13,6 +13,10 @@ g= lambda x: x #exact
 
 
 def poisson_solve(a,b,n,f,g):
+    #a-b interval
+    #number discrete point on interval
+    #f forcing function
+    #exact for endpoints
     h=(b-a)/(n-1)
     x=np.linspace(a,b,n)
     A=np.zeros([n,n])
