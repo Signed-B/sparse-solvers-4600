@@ -11,10 +11,10 @@ y2=1
 
 
 def f(x,y): #forcing
-    return x*y+7
+    return x*y
 
 def g(x,y): #end conditions function
-    return 4*x+y
+    return 2
 
 def poisson_solve(A,F): #solve linear system given banded matrix A and vecotr F
     U=np.linalg.solve(A,F)
@@ -60,7 +60,11 @@ def poisson_setup(x1,x2,y1,y2,n,f,g): #2d finite difference setup
     A=A*(1/(h**2))
     for i in range(n2):
         for j in range(n2):
+            F[i*n2+j]=g(xrange[i],yrange[j])
+    for i in range(1,n2-1):
+        for j in range(1,n2-1):
             F[i*n2+j]=f(xrange[i],yrange[j])
+
 
     return A,F
         
@@ -73,7 +77,7 @@ run_time=end_time-start_time
 solution_field=np.zeros([n,n])
 for i in range(n):
     for j in range(n):
-        solution_field[i,j]=F[i*n+j]
+        solution_field[i,j]=U[i*n+j]
     
     
     

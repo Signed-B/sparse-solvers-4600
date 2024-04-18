@@ -4,12 +4,12 @@ import matplotlib.pyplot as plt
 
 a=-2
 b=2
-n=5
+n=50
 
 
 
-f= lambda x: x #forcing
-g= lambda x: x**3 #exact for endpoints
+f= lambda x: x**2 #forcing
+g= lambda x: x #exact for endpoints
 
 
 #u''(x)=f(x)
