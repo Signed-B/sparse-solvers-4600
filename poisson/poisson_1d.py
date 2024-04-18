@@ -18,7 +18,6 @@ def poisson_solve(a,b,n,f,g):
     #n-number discrete point on interval
     #f forcing function
     #exact function to calc endpoints
-    #c_1, c_2 are coefficients on diff eq
     h=(b-a)/(n-1)
     x=np.linspace(a,b,n)
     A=np.zeros([n,n])
@@ -38,6 +37,6 @@ def poisson_solve(a,b,n,f,g):
     return x,u,A
         
 x,u,A=poisson_solve(a, b, n, f, g)
-plt.plot(x, u)
+plt.plot(x,u)
 plt.plot(x,g(x))
 plt.show()

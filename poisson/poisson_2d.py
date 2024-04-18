@@ -57,7 +57,7 @@ def poisson_setup(x1,x2,y1,y2,n,f,g): #2d finite difference setup
         A[i,i+3]=-1
         A[i,i-1]=-1
         A[i,i-3]=-1
-    A=A*(1/(h**2))
+    A=np.transpose(A)*(1/(h**2))
     for i in range(n2):
         for j in range(n2):
             F[i*n2+j]=g(xrange[i],yrange[j])
