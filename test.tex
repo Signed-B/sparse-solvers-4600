@@ -1,0 +1,186 @@
+% Gaussian elimination example, cite \cite{olver2006applied}
+
+$3 \times 3$ example:
+\begin{align*}
+    \begin{bmatrix}
+        a_1 & b_1 & 0 \\
+        c_2 & a_2 & b_2 \\
+        0 & c_3 & a_3 \\
+    \end{bmatrix} &\gaussea \begin{bmatrix}
+        a_1 & b_1 & 0 \\
+        0 & a_2 - b_1\frac{c_2}{a_1} & b_2 \\
+        0 & c_3 & a_3 \\
+    \end{bmatrix} \gaussea \begin{bmatrix}
+        a_1 & b_1 & 0 \\
+        0 & a_2 - b_1\frac{c_2}{a_1} & b_2 \\
+        0 & 0 & a_3 - b_2\frac{c_3}{a_2 - b_1\frac{c_2}{a_1}} \\
+    \end{bmatrix} \\&\gaussem \begin{bmatrix}
+        1 & b_1\left(a_1\right)^{-1} & 0 \\
+        0 & a_2 - b_1\frac{c_2}{a_1} & b_2 \\
+        0 & 0 & a_3 - b_2\frac{c_3}{a_2 - b_1\frac{c_2}{a_1}} \\
+    \end{bmatrix} \gaussem \begin{bmatrix}
+        1 & b_1\left(a_1\right)^{-1} & 0 \\
+        0 & 1 & b_2\left(a_2 - b_1\frac{c_2}{a_1}\right)^{-1} \\
+        0 & 0 & a_3 - b_2\frac{c_3}{a_2 - b_1\frac{c_2}{a_1}} \\
+    \end{bmatrix} \\&\gaussem \begin{bmatrix}
+        1 & b_1\left(a_1\right)^{-1} & 0 \\
+        0 & 1 & b_2\left(a_2 - b_1\frac{c_2}{a_1}\right)^{-1} \\
+        0 & 0 & 1 \\
+\end{align*}
+
+Each addition step of the Gaussian elimination consisted of 6 operations: 3 multiplications and 3 subtractions, one of each for each element, while each multiplication step consisted of 3 multiplication operations. Thus, this process took 21 operations. % TODO which operations were all zero?
+We notice that, if we rewrite the superdiagonal elements as $c'_i$, we can write the matrix as:
+\begin{align*}
+    \begin{bmatrix}
+        1 & c'_1 & 0 \\
+        0 & 1 & c'_2 \\
+        0 & 0 & 1 \\
+    \end{bmatrix} & & \text{where} & & c'_1 = b_1\left(a_1\right)^{-1} & & \text{and} & & c'_2 = b_2\left(a_2 - b_1\frac{c_2}{a_1}\right)^{-1} = b_2(a_2 - c_2c'_1) \\
+\end{align*}
+
+Doing the same for a $4 \times 4$ example, defining the $c'_i$ superdiagonal elements as we go, we find:
+\begin{align*}
+    \begin{bmatrix}
+        a_1 & b_1 & 0 & 0 \\
+        c_2 & a_2 & b_2 & 0 \\
+        0 & c_3 & a_3 & b_3 \\
+        0 & 0 & c_4 & a_4 \\
+    \end{bmatrix} & \gaussem \begin{bmatrix}
+        1 & b_1(a_1)^{-1} & 0 & 0 \\
+        c_2 & a_2 & b_2 & 0 \\
+        0 & c_3 & a_3 & b_3 \\
+        0 & 0 & c_4 & a_4 \\
+    \end{bmatrix} \text{ with } c'_1 = b_1(a_1)^{-1} \\
+    &\gaussea \begin{bmatrix}
+        1 & c'_1 & 0 & 0 \\
+        0 & a_2 - c_2c'_1 & b_2 & 0 \\
+        0 & c_3 & a_3 & b_3 \\
+        0 & 0 & c_4 & a_4 \\
+    \end{bmatrix} \gaussem \begin{bmatrix}
+        1 & c'_1 & 0 & 0 \\
+        0 & 1 & b_2(a_2 - c_2c'_1)^{-1} & 0 \\
+        0 & c_3 & a_3 & b_3 \\
+        0 & 0 & c_4 & a_4 \\
+    \end{bmatrix} \text{ with } c'_2 = b_2(a_2 - c_2c'_1)^{-1} \\
+    &\gaussea \begin{bmatrix}
+        1 & c'_1 & 0 & 0 \\
+        0 & 1 & c'_2 & 0 \\
+        0 & 0 & a_3 - c_3c'_2 & b_3 \\
+        0 & 0 & c_4 & a_4 \\
+    \end{bmatrix} \gaussem \begin{bmatrix}
+        1 & c'_1 & 0 & 0 \\
+        0 & 1 & c'_2 & 0 \\
+        0 & 0 & 1 & b_3(a_3 - c_3c'_2)^{-1} \\
+        0 & 0 & c_4 & a_4 \\
+    \end{bmatrix} \text{ with } c'_3 = b_3(a_3 - c_3c'_2)^{-1} \\
+    &\gaussea \begin{bmatrix}
+        1 & c'_1 & 0 & 0 \\
+        0 & 1 & c'_2 & 0 \\
+        0 & 0 & 1 & c'_3 \\
+        0 & 0 & 0 & a_4 - c_4c'_3 \\
+    \end{bmatrix} \gaussem \begin{bmatrix}
+        1 & c'_1 & 0 & 0 \\
+        0 & 1 & c'_2 & 0 \\
+        0 & 0 & 1 & c'_3 \\
+        0 & 0 & 0 & 1 \\
+    \end{bmatrix}
+\end{align*}
+
+As before, addition step of the Gaussian elimination consisted of 8 operations: 4 multiplications and 4 subtractions while each multiplication step consisted of 4 multiplication operations. Thus, this process took 40 operations. % TODO which operations were all zero?
+We write the matrix as:
+\begin{align*}
+    \begin{bmatrix}
+        1 & c'_1 & 0 & 0 \\
+        0 & 1 & c'_2 & 0 \\
+        0 & 0 & 1 & c'_3 \\
+        0 & 0 & 0 & 1 \\
+    \end{bmatrix} & & \text{where} & & c'_1 = b_1(a_1)^{-1} & & c'_2 = b_2(a_2 - c_2c'_1)^{-1} & & c'_3 = b_3(a_3 - c_3c'_2)^{-1} \\
+\end{align*}
+
+We are starting to see the pattern. Finally, for a $5 \times 5$ example, we find:
+\begin{align*}
+    \begin{bmatrix}
+        a_1 & b_1 & 0 & 0 & 0 \\
+        c_2 & a_2 & b_2 & 0 & 0 \\
+        0 & c_3 & a_3 & b_3 & 0 \\
+        0 & 0 & c_4 & a_4 & b_4 \\
+        0 & 0 & 0 & c_5 & a_5 \\
+    \end{bmatrix} & \gaussem \begin{bmatrix}
+        1 & b_1(a_1)^{-1} & 0 & 0 & 0 \\
+        c_2 & a_2 & b_2 & 0 & 0 \\
+        0 & c_3 & a_3 & b_3 & 0 \\
+        0 & 0 & c_4 & a_4 & b_4 \\
+        0 & 0 & 0 & c_5 & a_5 \\
+    \end{bmatrix} \text{ with } c'_1 = b_1(a_1)^{-1} \\
+    &\gaussea \begin{bmatrix}
+        1 & c'_1 & 0 & 0 & 0 \\
+        0 & a_2 - c_2c'_1 & b_2 & 0 & 0 \\
+        0 & c_3 & a_3 & b_3 & 0 \\
+        0 & 0 & c_4 & a_4 & b_4 \\
+        0 & 0 & 0 & c_5 & a_5 \\
+    \end{bmatrix} \gaussem \begin{bmatrix}
+        1 & c'_1 & 0 & 0 & 0 \\
+        0 & 1 & b_2(a_2 - c_2c'_1)^{-1} & 0 & 0 \\
+        0 & c_3 & a_3 & b_3 & 0 \\
+        0 & 0 & c_4 & a_4 & b_4 \\
+        0 & 0 & 0 & c_5 & a_5 \\
+    \end{bmatrix} \text{ with } c'_2 = b_2(a_2 - c_2c'_1)^{-1} \\
+    &\gaussea \begin{bmatrix}
+        1 & c'_1 & 0 & 0 & 0 \\
+        0 & 1 & c'_2 & 0 & 0 \\
+        0 & 0 & a_3 - c_3c'_2 & b_3 & 0 \\
+        0 & 0 & c_4 & a_4 & b_4 \\
+        0 & 0 & 0 & c_5 & a_5 \\
+    \end{bmatrix} \gaussem \begin{bmatrix}
+        1 & c'_1 & 0 & 0 & 0 \\
+        0 & 1 & c'_2 & 0 & 0 \\
+        0 & 0 & 1 & b_3(a_3 - c_3c'_2)^{-1} & 0 \\
+        0 & 0 & c_4 & a_4 & b_4 \\
+        0 & 0 & 0 & c_5 & a_5 \\
+    \end{bmatrix} \text{ with } c'_3 = b_3(a_3 - c_3c'_2)^{-1} \\
+    &\gaussea \begin{bmatrix}
+        1 & c'_1 & 0 & 0 & 0 \\
+        0 & 1 & c'_2 & 0 & 0 \\
+        0 & 0 & 1 & c'_3 & 0 \\
+        0 & 0 & 0 & a_4 - c_4c'_3 & b_4 \\
+        0 & 0 & 0 & c_5 & a_5 \\
+    \end{bmatrix} \gaussem \begin{bmatrix}
+        1 & c'_1 & 0 & 0 & 0 \\
+        0 & 1 & c'_2 & 0 & 0 \\
+        0 & 0 & 1 & c'_3 & 0 \\
+        0 & 0 & 0 & 1 & b_4(a_4 - c_4c'_3)^{-1} \\
+        0 & 0 & 0 & c_5 & a_5 \\
+    \end{bmatrix} \text{ with } c'_4 = b_4(a_4 - c_4c'_3)^{-1} \\
+    &\gaussea \begin{bmatrix}
+        1 & c'_1 & 0 & 0 & 0 \\
+        0 & 1 & c'_2 & 0 & 0 \\
+        0 & 0 & 1 & c'_3 & 0 \\
+        0 & 0 & 0 & 1 & c'_4 \\
+        0 & 0 & 0 & 0 & a_5 - c_5c'_4 \\
+    \end{bmatrix} \gaussem \begin{bmatrix}
+        1 & c'_1 & 0 & 0 & 0 \\
+        0 & 1 & c'_2 & 0 & 0 \\
+        0 & 0 & 1 & c'_3 & 0 \\
+        0 & 0 & 0 & 1 & c'_4 \\
+        0 & 0 & 0 & 0 & 1 \\
+    \end{bmatrix}
+\end{align*}
+
+For this "large" size, addition step of the Gaussian elimination consisted of 10 operations: 5 multiplications and 5 subtractions while each multiplication step consisted of 5 multiplication operations. Thus, this process took 65 operations. % TODO which operations were all zero?
+We write the matrix as:
+\begin{align*}
+    \begin{bmatrix}
+        1 & c'_1 & 0 & 0 & 0 \\
+        0 & 1 & c'_2 & 0 & 0 \\
+        0 & 0 & 1 & c'_3 & 0 \\
+        0 & 0 & 0 & 1 & c'_4 \\
+        0 & 0 & 0 & 0 & 1 \\
+    \end{bmatrix} & & \text{where} & & c'_1 = b_1(a_1)^{-1} & & c'_2 = b_2(a_2 - c_2c'_1)^{-1} & & c'_3 = b_3(a_3 - c_3c'_2)^{-1} & & c'_4 = b_4(a_4 - c_4c'_3)^{-1} \\
+\end{align*}
+We can see the number of operations grows superliearly with the size of the matrix. In fact, for a $n \times n$ matrix, the number of operations grows at $O(n^3)$. % TODO is this true for this style of gaussian?
+However, there is a clear pattern in the superdiagonal elements, which we can use to calculate them without performing the Gaussian elimination.
+With a diagonal of all $1$-values, the superdiagonal elements are given by the recursive formula
+$$c'_1 = \frac{b_1}{a_1}, \;\;\; c'_i = \frac{b_i}{a_i - c_{i}c'_{i-1}}$$
+where $i$ is the index of the superdiagonal element. Computing the superdiagonal elements in this way takes 1 multiplication operation, one subtraction operation, and one division operation \textit{per row}, with only one operation for the first. Thus, the total number of operations is $3n - 2$ for a $n \times n$ matrix. % TODO which operations were all zero?
+
+But is this method accurate? 
