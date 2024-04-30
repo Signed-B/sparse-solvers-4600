@@ -6,14 +6,26 @@ x2=1;
 y1=0;
 y2=1;
 
+Dx=linspace(x1,x2,n);
+Dy=linspace(y1,y2,n);
+D=zeros(n^2,2);
+D(1,1)=x1;
+for i=1:n^2-1
+    D(i+1,1)=Dx(mod(i,n)+1);
+    D(i+1,2)=Dy(floor(i/n)+1);
+end
 
 
-function [A,rhs,D]=poisson_setup(x1,x2,y1,y2,n,ddx,ddy)
+
+rhs=zeros(n^2,1);
+rhs=g(D(:,1),D(:,2));
+
+function [A,rhs,D]=poisson_setup(x1,x2,y1,y2,n,g)
     %A is matrix, rhs is randhand side, D is domain of finite difference
     %points
     %x1,x2,y1,y2 define interval of interest
     %n is number of point in each direction
-    %ddx,ddy are double partials in each direction
+    %g is rhs of 
 
     %assumes function is zero at end conditions
 
@@ -28,8 +40,7 @@ function [A,rhs,D]=poisson_setup(x1,x2,y1,y2,n,ddx,ddy)
     
 
     
-    rhs=zeros(n^2,1);
-    rhs=D
+    rhs=g(D(:,1),D(:,2));
     for i=1:n^2
         if i<n
             rhs(i)=0;
@@ -46,9 +57,6 @@ function [A,rhs,D]=poisson_setup(x1,x2,y1,y2,n,ddx,ddy)
 
 end
 
-
-
-
 function [z]=f(x,y) %solution
     z=sin(2*pi*x)+sin(2*pi*y);
 end
@@ -60,4 +68,8 @@ end
 
 function [z]=ddy(x,y) %d''f/dy''
     z=-4*pi^2*sin(2*pi*y);
+end
+
+function [z]=g(x,y)
+    z=ddx(x,y)+ddy(x,y);
 end
