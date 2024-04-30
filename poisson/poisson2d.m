@@ -1,75 +1,72 @@
 clc; clear; close all;
 
-n=11; %number points per direction
-x1=0;
+n=6; %number points per direction
+
+x1=0; %bounrdries
 x2=1;
 y1=0;
-y2=1;
+y2=1; 
 
+%assumes constant space in both direction (with break otherwise)
+h=(x2-x1)/(n-1); %spacing
+
+%Domain (100 different ways)
+[grid_x,grid_y]=meshgrid(x1:h:x2,y1:h:y2);
 Dx=linspace(x1,x2,n);
 Dy=linspace(y1,y2,n);
 D=zeros(n^2,2);
-D(1,1)=x1;
+D(1,1)=x1; 
 for i=1:n^2-1
     D(i+1,1)=Dx(mod(i,n)+1);
     D(i+1,2)=Dy(floor(i/n)+1);
 end
 
 
-
+A=zeros(n^2,n^2); %creates empty variables
 rhs=zeros(n^2,1);
-rhs=g(D(:,1),D(:,2));
 
-function [A,rhs,D]=poisson_setup(x1,x2,y1,y2,n,g)
-    %A is matrix, rhs is randhand side, D is domain of finite difference
-    %points
-    %x1,x2,y1,y2 define interval of interest
-    %n is number of point in each direction
-    %g is rhs of 
-
-    %assumes function is zero at end conditions
-
-    Dx=linspace(x1,x2,n);
-    Dy=linspace(y1,y2,n);
-    D=zeros(n^2,2);
-    D(1,1)=x1;
-    for i=1:n^2-1
-        D(i+1,1)=Dx(mod(i,n)+1);
-        D(i+1,2)=Dy(floor(i/n)+1);
-    end
-    
-
-    
-    rhs=g(D(:,1),D(:,2));
-    for i=1:n^2
-        if i<n
-            rhs(i)=0;
-        end
-        
-        if i>n^2-n
-            rhs(i)=0;
+for i=1:n^2
+    on_boundry=0; %boundry boolean
+    if i<=n || i>n^2-n || mod(i,n)==0 || mod(i,n)==1  %checks if u_i is on boundry
+        on_boundry=1;
+        rhs(i)=g(D(i,1),D(i,2)); %if yes rhs is boundry function
+        A(i,i)=1; %corresponding row in A is just part of identity
+    else
+        rhs(i)=f(D(i,1),D(i,2)); %if not rhs is f
+        for j=1:n^2
+            A(i,i)=-4/h^2; %approximates second derivvative
+            A(i,i+1)=1/h^2;
+            A(i,i-1)=1/h^2;
+            A(i,i+(n))=1/h^2;
+            A(i,i-(n))=1/h^2;
         end
     end
-
-
-        A=zeros(n^2,n^2);
-
-
 end
 
-function [z]=f(x,y) %solution
-    z=sin(2*pi*x)+sin(2*pi*y);
+U=A\rhs; %solves system
+
+grid_u=zeros(n,n); %converst solution back to matrix form
+for i=1:n
+    for j=1:n
+        grid_u(i,j)=U(n*(i-1)+j);
+    end
+end
+hold on;
+surface(grid_x,grid_y,grid_u) %plots solution
+
+% calcs and plot actual
+[real_x,real_y]=meshgrid(x1:(x2-x1)/200:x2,y1:(x2-x1)/200:y2);
+surface(real_x,real_y,actual(real_x,real_y))
+
+
+function [z]=f(x,y) %rhs forcing function
+    z=-8*pi^2*sin(2*pi*y).*sin(2*pi*x);
 end
 
-function [z]=ddx(x,y) %d''f/dx''
-    z=-4*pi^2*sin(2*pi*x);
+function [z]=g(x,y) %broundry condition function
+    z=0; % zero for dirichlet boundry conditions
 end
 
-
-function [z]=ddy(x,y) %d''f/dy''
-    z=-4*pi^2*sin(2*pi*y);
-end
-
-function [z]=g(x,y)
-    z=ddx(x,y)+ddy(x,y);
+function [z]=actual(x,y) %actual solution to ivp (for plots and error)
+    z=sin(2*pi*x).*sin(2*pi*y);
 end
