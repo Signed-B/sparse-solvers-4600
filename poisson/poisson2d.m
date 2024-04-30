@@ -15,10 +15,11 @@ function [A,rhs,D]=poisson_setup(x1,x2,y1,y2,n,ddx,ddy)
 
     %assumes function is zero at end conditions
     A=zeros(n^2,n^2);
-    A=A++4*eye(n^2,n^2);
     rhs=zeros(n^2,1);
     for i=1:n^2
-        
+        if i<n
+            rhs(i)=0;
+        end
     end
 
 

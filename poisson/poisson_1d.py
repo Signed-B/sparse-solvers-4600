@@ -5,7 +5,7 @@ from time import process_time
 
 a=0
 b=1
-n=400
+n=10
 
 
 
