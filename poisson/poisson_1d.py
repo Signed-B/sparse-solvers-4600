@@ -1,16 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from time import process_time
-from thomas import thomas
+#from thomas import thomas
 
-a=-2
-b=2
-n=750
+a=0
+b=1
+n=400
 
 
 
-f= lambda x: x**2 #forcing
-g= lambda x: x #exact for endpoints
+f= lambda x: 12*x**2+8 #forcing
+g= lambda x: x**4+4*x**2-6*x+2 #exact for endpoints
 
 
 #u''(x)=f(x)
@@ -46,14 +46,29 @@ print('Np.linalg.solve time: ', time_npsolve)
 
 
 start_thomas = process_time()
-uthomas = np.linalg.solve(A,rhs)
+uthomas = np.linalg.solve(A,rhs) #fix to correct solver
 time_thomas = process_time() - start_thomas
 print('Thomas time: ', time_thomas)
 
 #Probably want to implement a way to solve for multiple n's and then visualize the difference in times as n increases.
 #Some n's will be too small (e.g. n<500) but I don't know when you start seeing differences
-'''
-plt.plot(x,u)
-plt.plot(x,g(x))
+
+
+#error calcs
+error=np.zeros([n,1])
+for i in range(n):
+    error[i]=abs(uthomas[i]-g(x[i]))
+
+
+
+#plot solutions
+plt.plot(x,uthomas,'--') #calculated
+plt.plot(np.linspace(a,b,400),g(np.linspace(a,b,400)))
+plt.title('Actual Function vs Finite Diff')
+plt.legend(["Finite","Actual"])
 plt.show()
-'''
+
+#plot log error
+plt.plot(x,np.log10(error))
+plt.title('Log10 Error')
+plt.show()

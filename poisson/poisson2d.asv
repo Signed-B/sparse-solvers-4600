@@ -1,0 +1,27 @@
+clc; clear; close all;
+
+n=10; %number points per direction
+x1=0;
+x2=1;
+y1=0;
+y2=1;
+
+function [A,rhs,D]=poisson_setup(x1,x2,y1,y2,n,f,ddx)
+
+end
+
+
+
+
+function [z]=f(x,y)
+    z=sin(2*pi*x)+sin(2*pi*y);
+end
+
+function [z]=ddx(x,y) %d''f/dx''
+    z=-4*pi^2*sin(2*pi*x);
+end
+
+
+function [z]=ddy(x,y) %d''f/dy''
+    z=-4*pi^2*sin(2*pi*y);
+end
