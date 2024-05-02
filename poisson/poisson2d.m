@@ -2,7 +2,7 @@ clc; clear; close all;
 
 n=5; %number points per direction
 
-x1=0; %bounrdries
+x1=0; %bounrdries must be sqaure
 x2=1;
 y1=0;
 y2=1; 
