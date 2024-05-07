@@ -1,6 +1,6 @@
 clc; clear; close all; %Housekeeping
 %%
-n=6; %number points per direction
+n=200; %number points per direction
 
 x1=0; %bounrdries must be sqaure
 x2=1;
@@ -19,14 +19,33 @@ U=A\rhs; %solves system (default matlab system solver for now)
 plot_calc_solution_P2D(U,grid_x,grid_y,n) %plot solution calculated with discete finite differences
 plot_real_solution_P2D(x1,x2,y1,y2,Actual) %plot real soloution 
 
-[max_error,average_error]=error_P2D(Actual,U,x1,x2,y1,y2,grid_x,grid_y,0); %calcs and plots error (last input boolean to determine if plot results)
+[max_error,average_error]=error_P2D(Actual,U,x1,x2,y1,y2,grid_x,grid_y,1); %calcs and plots error (last input boolean to determine if plot results)
+%% SHows sublinear relationship between error and n
+% count=100; 
+% max_error=zeros(count,1);
+% average_error=zeros(count,1);
+% Ns=zeros(count,1);
+% for i =5:5+count
+%     Ns(i)=i;
+%     [A,rhs,grid_x,grid_y]=create_system_P2D(i,x1,x2,y1,y2,G,F); %creates sparse banded matrix to solve problem
+%     U=A\rhs; %solves system 
+%     [max_error(i),average_error(i)]=error_P2D(Actual,U,x1,x2,y1,y2,grid_x,grid_y,0);
+% end
+% figure()
+% hold on;
+% plot(Ns,log10(average_error))
+% plot(Ns,log10(max_error))
+% title("Max and Average Absolute Error vs n")
+% xlabel("n")
+% ylabel("Log Error")
+% legend("Average Error","Maximum Error")
 
-max_n=200; %max size of n for different solver testing
+
+max_n=10; %max size of n for different solver testing
 spacing=2; %step size of n between tests (must be divisor of max_n)
 create_system_simp=@(i)create_system_P2D(i,x1,x2,y1,y2,G,F); %function handle to spped up test of same equation at different n values
-A=full(A);
 
-method_test(max_n,spacing,create_system_simp) %test differetn system solving methods and plot time vs size of matrix
+%method_test(max_n,spacing,create_system_simp) %test differetn system solving methods and plot time vs size of matrix
 
 function []=method_test(max_n,spacing,create_system_simp)
     times=NaN(max_n/spacing,3);
@@ -67,11 +86,11 @@ function [z]=f(x,y) %rhs forcing function
 end
 
 function [z]=g(x,y) %boundry condition function
-    z=x.*y+x; % zero for dirichlet boundry conditions
+    z=x.*y; % zero for dirichlet boundry conditions
 end
 
 function [z]=actual(x,y) %actual solution to ivp (for plots and error calcs)
-    z=sin(2*pi*x).*sin(2*pi*y)+x.*y+x;
+    z=sin(2*pi*x).*sin(2*pi*y)+x.*y;
 end
 
 function [A,rhs,grid_x,grid_y]=create_system_P2D(n,x1,x2,y1,y2,g,f) %Creates rhs and matrix of a linear system, 
@@ -137,17 +156,17 @@ function [max_err,avg_err]=error_P2D(actual,U,x1,x2,y1,y2,grid_x,grid_y,plot_res
 
     for i=1:c
         for j=1:c
-            solution_error(i,j)=abs(V(x(i),y(j))-actual(x(i),y(j))); %evalutes absolute error of solution at eahc point
+            solution_error(i,j)=abs(V(x(i),y(j))-actual(x(i),y(j))); %evalutes relative error of solution at eahc point
         end
     end
     max_err=max(solution_error,[],"all"); %finds max error
     avg_err=mean2(solution_error); %finds average error
 
     if plot_results==1 %check if result plot is wanted
-        [error_x,error_y]=meshgrid(x1:(x2-x1)/(c-1):x2,y1:(x2-x1)/(c-1):y2); %creates grid of x and y value to evaluet aeeor at
+        [error_x,error_y]=meshgrid(x1:(x2-x1)/(c-1):x2,y1:(x2-x1)/(c-1):y2); %creates grid of x and y value to evaluete error at
         figure()
         surface(error_x,error_y,log10(solution_error)) %plots log10 error
-        title("Log of absolute error")
+        title("Log of Absolute Error")
         view(3)
     end
 end
