@@ -1,6 +1,6 @@
 clc; clear; close all; %Housekeeping
 %%
-n=200; %number points per direction
+n=100; %number points per direction
 
 x1=0; %bounrdries must be sqaure
 x2=1;
@@ -16,10 +16,14 @@ Actual=@(x,y)actual(x,y);
 
 U=A\rhs; %solves system (default matlab system solver for now)
 
+ A=full(A); %gets spy graph of sparse matrix A
+ spy(A)
+ title("2d Poisson Matrix, n=10")
+
 plot_calc_solution_P2D(U,grid_x,grid_y,n) %plot solution calculated with discete finite differences
 plot_real_solution_P2D(x1,x2,y1,y2,Actual) %plot real soloution 
 
-[max_error,average_error]=error_P2D(Actual,U,x1,x2,y1,y2,grid_x,grid_y,1); %calcs and plots error (last input boolean to determine if plot results)
+[max_error,average_error]=error_P2D(Actual,U,x1,x2,y1,y2,grid_x,grid_y,0); %calcs and plots error (last input boolean to determine if plot results)
 %% SHows sublinear relationship between error and n
 % count=100; 
 % max_error=zeros(count,1);
