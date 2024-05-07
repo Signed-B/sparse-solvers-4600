@@ -1,11 +1,51 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from time import process_time
-#from thomas import thomas
+
+#Thomas algo stuff because it's in a different folder :/
+
+def thomas(A: np.array, d: np.array, *args) -> np.array:
+    """
+    Solves a tridiagonal system of equations using the Thomas algorithm by
+    parsing the matrix A into its three diagonals.
+    """
+    return abc_thomas(
+        np.concatenate([np.array([0]), np.diag(A, -1)]),
+        np.diag(A),
+        np.concatenate([np.diag(A, 1), np.array([0])]),
+        d
+    )
+
+def abc_thomas(a: np.array, b: np.array, c: np.array, d: np.array) -> np.array:
+    """
+    Solves a tridiagonal system of equations using the Thomas algorithm 
+    given the three diagonals of the matrix A.
+    """
+    # TODO rewrite to make more verbose.
+    # TODO comment the code.
+    n = len(d)
+    c_ = np.zeros(n)
+    d_ = np.zeros(n)
+    x = np.zeros(n)
+    
+    c_[0] = c[0] / b[0]
+    d_[0] = d[0] / b[0]
+    
+    for i in range(1, n):
+        c_[i] = c[i] / (b[i] - a[i] * c_[i - 1])
+        d_[i] = (d[i] - a[i] * d_[i - 1]) / (b[i] - a[i] * c_[i - 1])
+        
+    x[n - 1] = d_[n - 1]
+    
+    for i in range(n - 2, -1, -1):
+        x[i] = d_[i] - c_[i] * x[i + 1]
+        
+    return x
+
 
 a=0
 b=1
-n=5
+n=500
 
 
 
@@ -46,30 +86,33 @@ print('Np.linalg.solve time: ', time_npsolve)
 
 
 start_thomas = process_time()
-uthomas = np.linalg.solve(A,rhs) #fix to correct solver
+uthomas = thomas(A,rhs) #fix to correct solver
+#uthomas = uthomas[:,0]
 time_thomas = process_time() - start_thomas
 print('Thomas time: ', time_thomas)
 
 #Probably want to implement a way to solve for multiple n's and then visualize the difference in times as n increases.
 #Some n's will be too small (e.g. n<500) but I don't know when you start seeing differences
+n_test = 100
+x_test = np.linspace(a,b,n_test)
 
-
-#error calcs
-error=np.zeros([n,1])
-for i in range(n):
-    error[i]=abs(uthomas[i]-g(x[i]))
-    error[i]=np.interp(0.5555, x,uthomas[0:4,:])
-
-
+interp_thomas = np.zeros([n_test,1])
+for i in range(0,100):
+    interp_thomas[i] = np.interp(x_test[i],x,uthomas)
+    
+g = (g(x_test)) 
+error = np.zeros([n_test,1])   
+for i in range(0,n_test):
+    error[i] = abs(interp_thomas[i] - g[i])
 
 #plot solutions
 plt.plot(x,uthomas,'--') #calculated
-plt.plot(np.linspace(a,b,400),g(np.linspace(a,b,400)))
+plt.plot(x_test,g)
 plt.title('Actual Function vs Finite Diff')
 plt.legend(["Finite","Actual"])
 plt.show()
 
 #plot log error
-plt.plot(x,np.log10(error))
+plt.plot(x_test,np.log10(error))
 plt.title('Log10 Error')
 plt.show()
