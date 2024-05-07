@@ -47,55 +47,65 @@ def abc_thomas(a: np.array, b: np.array, c: np.array, d: np.array) -> np.array:
 
 a=0
 b=1
-n=50
 
 f= lambda x: 12*x**2+8 #forcing
 g= lambda x: x**4+4*x**2-6*x+2 #exact for endpoints
 
+nstop = 1000
+time_lusolve = np.zeros([nstop,1])
+time_thomas = np.zeros([nstop,1])
+for n in range(2, nstop):
+    #u''(x)=f(x)
+    def poisson(a,b,n,f,g):
+        #a-b interval
+        #n-number discrete point on interval
+        #f forcing function
+        #exact function to calc endpoints
+        h=(b-a)/(n-1)
+        x=np.linspace(a,b,n)
+        A=np.zeros([n,n])
+        rhs=np.zeros([n,1])
+        i=0
+        A[i,i]=1
+        rhs[i]=g(x[i])
+        for i in range(1,n-1):
+            A[i,i-1]=1.0/(h**2)
+            A[i,i]=-2/(h**2)
+            A[i,i+1]=1/(h**2)
+            rhs[i]=f(x[i])
+        i=n-1
+        A[i,i]=1
+        rhs[i]=g(x[i])
+        return x,rhs,A
+            
+    x,rhs,A=poisson(a, b, n, f, g)
+    
+    #If we use linalg.solve, we need to understand how it works. Currently I think it uses an LU factorization
+    start_lusolve = perf_counter_ns()
+    p, l, u = sp.linalg.lu(A)
+    y = sp.linalg.solve_triangular(l, p@rhs, lower=True)
+    lusoln = sp.linalg.solve_triangular(u, y)
+    time_lusolve[n] = perf_counter_ns() - start_lusolve
+#    print('LU decomposition time: ', time_lusolve, 'ns')
+    
+    
+    start_thomas = perf_counter_ns()
+    thomassoln = thomas(A,rhs) #fix to correct solver
+    #uthomas = uthomas[:,0]
+    time_thomas[n] = perf_counter_ns() - start_thomas
+#    print('Thomas time: ', time_thomas, 'ns')
 
-#u''(x)=f(x)
-def poisson(a,b,n,f,g):
-    #a-b interval
-    #n-number discrete point on interval
-    #f forcing function
-    #exact function to calc endpoints
-    h=(b-a)/(n-1)
-    x=np.linspace(a,b,n)
-    A=np.zeros([n,n])
-    rhs=np.zeros([n,1])
-    i=0
-    A[i,i]=1
-    rhs[i]=g(x[i])
-    for i in range(1,n-1):
-        A[i,i-1]=1.0/(h**2)
-        A[i,i]=-2/(h**2)
-        A[i,i+1]=1/(h**2)
-        rhs[i]=f(x[i])
-    i=n-1
-    A[i,i]=1
-    rhs[i]=g(x[i])
-    return x,rhs,A
-        
-x,rhs,A=poisson(a, b, n, f, g)
-
-#If we use linalg.solve, we need to understand how it works. Currently I think it uses an LU factorization
-start_lusolve = perf_counter_ns()
-p, l, u = sp.linalg.lu(A)
-y = sp.linalg.solve_triangular(l, p@rhs, lower=True)
-lusoln = sp.linalg.solve_triangular(u, y)
-time_lusolve = perf_counter_ns() - start_lusolve
-print('LU decomposition time: ', time_lusolve, 'ns')
-
-
-start_thomas = perf_counter_ns()
-thomassoln = thomas(A,rhs) #fix to correct solver
-#uthomas = uthomas[:,0]
-time_thomas = perf_counter_ns() - start_thomas
-print('Thomas time: ', time_thomas, 'ns')
+n = np.arange(2,nstop+2, 1)
+plt.title('Thomas vs LU Decomposition')
+plt.xlabel('n')
+plt.ylabel('Time (ns)')
+plt.plot(n, time_lusolve, label = 'LU Decomposition')
+plt.plot(n, time_thomas, label = 'Thomas')
+plt.show()
 
 #Probably want to implement a way to solve for multiple n's and then visualize the difference in times as n increases.
 #Some n's will be too small (e.g. n<500) but I don't know when you start seeing differences
-n_test = 1000
+n_test = 500
 x_test = np.linspace(a,b,n_test)
 
 interp_thomas = np.zeros([n_test,1])
