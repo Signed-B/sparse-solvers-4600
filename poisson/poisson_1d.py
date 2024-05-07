@@ -58,6 +58,7 @@ print('Thomas time: ', time_thomas)
 error=np.zeros([n,1])
 for i in range(n):
     error[i]=abs(uthomas[i]-g(x[i]))
+    error[i]=np.interp(0.5555, x,uthomas[0:4,:])
 
 
 

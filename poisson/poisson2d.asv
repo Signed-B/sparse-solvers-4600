@@ -1,6 +1,6 @@
 clc; clear; close all; %Housekeeping
 %%
-n=6; %number points per direction
+n=8; %number points per direction
 
 x1=0; %bounrdries must be sqaure
 x2=1;
@@ -19,14 +19,14 @@ U=A\rhs; %solves system (default matlab system solver for now)
 plot_calc_solution_P2D(U,grid_x,grid_y,n) %plot solution calculated with discete finite differences
 plot_real_solution_P2D(x1,x2,y1,y2,Actual) %plot real soloution 
 
-[max_error,average_error]=error_P2D(Actual,U,x1,x2,y1,y2,grid_x,grid_y,0); %calcs and plots error (last input boolean to determine if plot results)
-
-max_n=200; %max size of n for different solver testing
-spacing=2; %step size of n between tests (must be divisor of max_n)
-create_system_simp=@(i)create_system_P2D(i,x1,x2,y1,y2,G,F); %function handle to spped up test of same equation at different n values
+[max_error,average_error]=error_P2D(Actual,U,x1,x2,y1,y2,grid_x,grid_y,1); %calcs and plots error (last input boolean to determine if plot results)
 A=full(A);
 
-method_test(max_n,spacing,create_system_simp) %test differetn system solving methods and plot time vs size of matrix
+max_n=10; %max size of n for different solver testing
+spacing=1; %step size of n between tests (must be divisor of max_n)
+create_system_simp=@(i)create_system_P2D(i,x1,x2,y1,y2,G,F); %function handle to spped up test of same equation at different n values
+
+method_test(max_n,spacing,create_system_simp) %test different system solving methods and plot time vs size of matrix
 
 function []=method_test(max_n,spacing,create_system_simp)
     times=NaN(max_n/spacing,3);
@@ -36,17 +36,17 @@ function []=method_test(max_n,spacing,create_system_simp)
         test_n(i/spacing)=i;
         if i<=80 %stop using regulular matrix in n>80
             tic;
-            U=full(A)\rhs; %solves system, default matlab system solver (in documentation looks like this is LU)
+            U=full(A)\rhs; %solves system, default matlab system solver
             times(i/spacing,1)=toc;
         end
-        if i<=24 %stop trying regular solver once n>20
+        if i<=20 %stop trying regular solver once n>20
             tic;
             U2=rref(cat(2,full(A),rhs)); %solves system using normal gaussian elimination
             U2=U2(:,i^2+1);
             times(i/spacing,2)=toc;
         end
         tic;
-        U_sparse=A\rhs;  %solves it using matlab built in sparse solver (looks like banded solver)
+        U_sparse=A\rhs;  %solves it using matlab built in sparse solver
         times(i/spacing,3)=toc;
     end
     %% 
@@ -67,11 +67,11 @@ function [z]=f(x,y) %rhs forcing function
 end
 
 function [z]=g(x,y) %boundry condition function
-    z=x.*y+x; % zero for dirichlet boundry conditions
+    z=x.*y; % zero for dirichlet boundry conditions
 end
 
 function [z]=actual(x,y) %actual solution to ivp (for plots and error calcs)
-    z=sin(2*pi*x).*sin(2*pi*y)+x.*y+x;
+    z=sin(2*pi*x).*sin(2*pi*y)+x.*y;
 end
 
 function [A,rhs,grid_x,grid_y]=create_system_P2D(n,x1,x2,y1,y2,g,f) %Creates rhs and matrix of a linear system, 
@@ -91,21 +91,35 @@ function [A,rhs,grid_x,grid_y]=create_system_P2D(n,x1,x2,y1,y2,g,f) %Creates rhs
         D(i+1,2)=Dy(floor(i/n)+1);
     end
     
-    A=spalloc(n^2,n^2,5*n^2); %creates empty variables
+    %A=spalloc(n^2,n^2,5*n); %creates empty variables
     rhs=zeros(n^2,1);
+    temp=nan(4*n,3);
+    counter=1;
     for i=1:n^2
         if i<=n || i>n^2-n || mod(i,n)==0 || mod(i,n)==1  %checks if u_i is on boundry
             rhs(i)=g(D(i,1),D(i,2)); %if yes, rhs is boundry function
-            A(i,i)=1; %corresponding row in A is just row of identity matrix
+            temp(counter,:)=[i,i,1];
+            counter=counter+1;
+            %A(i,i)=1; %corresponding row in A is just row of identity matrix
         else
             rhs(i)=f(D(i,1),D(i,2)); %if no, rhs is f
-            A(i,i)=-4/h^2; %approximates second derivvative in both directions at point
-            A(i,i+1)=1/h^2;
-            A(i,i-1)=1/h^2;
-            A(i,i+(n))=1/h^2;
-            A(i,i-(n))=1/h^2;
+            for j=1:n^2
+%                 A(i,i)=-4/h^2; %approximates second derivvative in both directions at point
+%                 A(i,i+1)=1/h^2;
+%                 A(i,i-1)=1/h^2;
+%                 A(i,i+(n))=1/h^2;
+%                 A(i,i-(n))=1/h^2;
+                temp(counter,:)=[i,i,-4/h^2];
+                temp(counter+1,:)=[i,i+1,1/h^2];
+                temp(counter+2,:)=[i,i-1,1/h^2];
+                temp(counter+3,:)=[i,i+n,1/h^2];
+                temp(counter+4,:)=[i,i-n,1/h^2];
+                counter=counter+5;
+
+            end
         end
     end
+    A=sparse(~isnan(temp(:,1)),~isnan(temp(:,2)),~isnan(temp(:,3)));
 end
 
 function []=plot_calc_solution_P2D(U,grid_x,grid_y,n) %plots calculated solutionq
