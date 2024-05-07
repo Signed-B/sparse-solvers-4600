@@ -77,7 +77,9 @@ b=1
 f= lambda x: 12*x**2+8 #forcing
 g= lambda x: x**4+4*x**2-6*x+2 #exact for endpoints
 
-n = np.arange(10,1001,10)
+nstop = 1000
+
+n = np.arange(10,nstop+1,10)
 time_lusolve = np.zeros([n.size,1])
 time_thomas = np.zeros([n.size,1])
 for i in n:
@@ -90,14 +92,14 @@ for i in n:
     p, l, u = sp.linalg.lu(A)
     y = sp.linalg.solve_triangular(l, p@rhs, lower=True)
     lusoln = sp.linalg.solve_triangular(u, y)
-    time_lusolve[int(i/10)] = perf_counter_ns() - start_lusolve
+    time_lusolve[np.where(n==i)[0][0]-1] = perf_counter_ns() - start_lusolve
 #    print('LU decomposition time: ', time_lusolve, 'ns')
     
     
     start_thomas = perf_counter_ns()
     thomassoln = thomas(A,rhs) #fix to correct solver
     #uthomas = uthomas[:,0]
-    time_thomas[int(i/10)] = perf_counter_ns() - start_thomas
+    time_thomas[np.where(n==i)[0][0]-1] = perf_counter_ns() - start_thomas
 #    print('Thomas time: ', time_thomas, 'ns')
 
 plt.title('Thomas vs LU Decomposition')
@@ -110,26 +112,52 @@ plt.show()
 
 #Probably want to implement a way to solve for multiple n's and then visualize the difference in times as n increases.
 #Some n's will be too small (e.g. n<500) but I don't know when you start seeing differences
-n_test = 500
+nsingle = 500
+
+x,rhs,A=poisson(a, b, nsingle, f, g)
+    
+#If we use linalg.solve, we need to understand how it works. Currently I think it uses an LU factorization
+start_lusolvesingle = perf_counter_ns()
+p, l, u = sp.linalg.lu(A)
+y = sp.linalg.solve_triangular(l, p@rhs, lower=True)
+lusoln = sp.linalg.solve_triangular(u, y)
+time_lusolvesingle = perf_counter_ns() - start_lusolvesingle
+#    print('LU decomposition time: ', time_lusolve, 'ns')
+    
+    
+start_thomassingle = perf_counter_ns()
+thomassoln_single = thomas(A,rhs) #fix to correct solver
+    #uthomas = uthomas[:,0]
+time_thomassingle = perf_counter_ns() - start_thomassingle
+#    print('Thomas time: ', time_thomas, 'ns')
+
+n_test = 1000
 x_test = np.linspace(a,b,n_test)
 
 interp_thomas = np.zeros([n_test,1])
 for i in range(0,n_test):
-    interp_thomas[i] = np.interp(x_test[i],x,thomassoln)
+    interp_thomas[i] = np.interp(x_test[i],x,thomassoln_single)
     
 g = (g(x_test)) 
-error = np.zeros([n_test,1])   
+abs_error = np.zeros([n_test,1])   
 for i in range(0,n_test):
-    error[i] = abs(interp_thomas[i] - g[i])
+    abs_error[i] = abs(interp_thomas[i] - g[i])
+ 
+rel_error = np.zeros([n_test,1])    
+for i in range(0,n_test):
+    rel_error[i] = abs(abs_error[i,0]/g[i])  
 
 #plot solutions
-plt.plot(x,thomassoln,'--') #calculated
-plt.plot(x_test,g)
+plt.plot(x_test,g, label='g(x)')
+plt.plot(x_test,interp_thomas,'--', label = 'Thomas Appproximation') #calculated
 plt.title('Actual Function vs Finite Diff')
-plt.legend(["Finite","Actual"])
+plt.xlabel('x')
+plt.legend()
 plt.show()
 
 #plot log error
-plt.plot(x_test,np.log10(error))
+plt.plot(x_test,np.log10(abs_error))
+plt.xlabel('x')
+plt.ylabel('log10 Error)')
 plt.title('Log10 Error')
 plt.show()
