@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from time import process_time
+from time import perf_counter_ns
 
 #Thomas algo stuff because it's in a different folder :/
 
@@ -45,9 +45,7 @@ def abc_thomas(a: np.array, b: np.array, c: np.array, d: np.array) -> np.array:
 
 a=0
 b=1
-n=500
-
-
+n=50
 
 f= lambda x: 12*x**2+8 #forcing
 g= lambda x: x**4+4*x**2-6*x+2 #exact for endpoints
@@ -79,25 +77,25 @@ def poisson(a,b,n,f,g):
 x,rhs,A=poisson(a, b, n, f, g)
 
 #If we use linalg.solve, we need to understand how it works. Currently I think it uses an LU factorization
-start_npsolve = process_time()
+start_npsolve = perf_counter_ns()
 unpsolve = np.linalg.solve(A,rhs)
-time_npsolve = process_time() - start_npsolve
+time_npsolve = perf_counter_ns() - start_npsolve
 print('Np.linalg.solve time: ', time_npsolve)
 
 
-start_thomas = process_time()
+start_thomas = perf_counter_ns()
 uthomas = thomas(A,rhs) #fix to correct solver
 #uthomas = uthomas[:,0]
-time_thomas = process_time() - start_thomas
+time_thomas = perf_counter_ns() - start_thomas
 print('Thomas time: ', time_thomas)
 
 #Probably want to implement a way to solve for multiple n's and then visualize the difference in times as n increases.
 #Some n's will be too small (e.g. n<500) but I don't know when you start seeing differences
-n_test = 100
+n_test = 1000
 x_test = np.linspace(a,b,n_test)
 
 interp_thomas = np.zeros([n_test,1])
-for i in range(0,100):
+for i in range(0,n_test):
     interp_thomas[i] = np.interp(x_test[i],x,uthomas)
     
 g = (g(x_test)) 
