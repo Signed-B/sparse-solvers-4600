@@ -52,8 +52,8 @@ def abc_thomas(a: np.array, b: np.array, c: np.array, d: np.array) -> np.array:
 def poisson(a,b,n,f,g):
     #a-b interval
     #n-number discrete point on interval
-    #f forcing function
-    #exact function to calc endpoints
+    #f-forcing function
+    #g-exact function to calc endpoints
     h=(b-a)/(n-1)
     x=np.linspace(a,b,n)
     A=np.zeros([n,n])
@@ -127,7 +127,6 @@ time_lusolvesingle = perf_counter_ns() - start_lusolvesingle
     
 start_thomassingle = perf_counter_ns()
 thomassoln_single = thomas(A,rhs) #fix to correct solver
-    #uthomas = uthomas[:,0]
 time_thomassingle = perf_counter_ns() - start_thomassingle
 #    print('Thomas time: ', time_thomas, 'ns')
 
@@ -142,16 +141,14 @@ g = (g(x_test))
 abs_error = np.zeros([n_test,1])   
 for i in range(0,n_test):
     abs_error[i] = abs(interp_thomas[i] - g[i])
- 
-rel_error = np.zeros([n_test,1])    
-for i in range(0,n_test):
-    rel_error[i] = abs(abs_error[i,0]/g[i])  
-
+#Note that relative error has issues because g(x) approaches and reaches 0 at point in the interval. This may be able to be overcome by adding a constant to our function, but more testing needed 
+    
 #plot solutions
 plt.plot(x_test,g, label='g(x)')
-plt.plot(x_test,interp_thomas,'--', label = 'Thomas Appproximation') #calculated
-plt.title('Actual Function vs Finite Diff')
+#plt.plot(x_test,interp_thomas,'--', label = 'Thomas Appproximation') #calculated
+plt.title('Actual Function')
 plt.xlabel('x')
+plt.ylabel('g(x)')
 plt.legend()
 plt.show()
 
